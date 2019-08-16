@@ -26,6 +26,7 @@ namespace Notepad
         public FindStringWindow()
         {
             InitializeComponent();
+            this.WayDownRadioBox.IsChecked = true;
         }
 
         private void CancelFind(object sender, RoutedEventArgs e)
@@ -35,15 +36,45 @@ namespace Notepad
 
         private void FindNextOne(object sender, RoutedEventArgs e)
         {
-            int TextBoxIndex = (mainWindow.NotepadTextBox.Text.Substring(mainWindow.NotepadTextBox.SelectionStart + mainWindow.NotepadTextBox.SelectionLength)).IndexOf(FindTextBox.Text);
-            if (TextBoxIndex == -1)
+            if(this.WayDownRadioBox.IsChecked == true)
             {
-                MessageBox.Show($"找不到\"{FindTextBox.Text}\"", "查找", MessageBoxButton.OK, MessageBoxImage.Information);
+                int TextBoxIndex = (mainWindow.NotepadTextBox.Text.Substring(mainWindow.NotepadTextBox.SelectionStart + mainWindow.NotepadTextBox.SelectionLength)).IndexOf(FindTextBox.Text);
+                if (TextBoxIndex == -1)
+                {
+                    MessageBox.Show($"找不到\"{FindTextBox.Text}\"", "查找", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                mainWindow.NotepadTextBox.SelectionStart = mainWindow.NotepadTextBox.SelectionStart + mainWindow.NotepadTextBox.SelectionLength + TextBoxIndex;
+                mainWindow.NotepadTextBox.SelectionLength = FindTextBox.Text.Length;
+                mainWindow.NotepadTextBox.Focus();
                 return;
             }
-            mainWindow.NotepadTextBox.SelectionStart = TextBoxIndex;
-            mainWindow.NotepadTextBox.SelectionLength = FindTextBox.Text.Length;
-            mainWindow.NotepadTextBox.Focus();
+            else
+            {
+                int TextBoxIndex = mainWindow.NotepadTextBox.Text.IndexOf(FindTextBox.Text);
+                int temp = 0;
+                for (; TextBoxIndex < mainWindow.NotepadTextBox.SelectionStart;)
+                {
+                    temp = TextBoxIndex;
+                    try
+                    {
+                        TextBoxIndex = temp + this.FindTextBox.Text.Length + mainWindow.NotepadTextBox.Text.Substring(temp + this.FindTextBox.Text.Length).IndexOf(FindTextBox.Text);
+                    }
+                    catch
+                    {
+                        break;
+                    }
+                }
+                if(TextBoxIndex > mainWindow.NotepadTextBox.SelectionStart)
+                {
+                    MessageBox.Show($"找不到\"{FindTextBox.Text}\"", "查找", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                mainWindow.NotepadTextBox.SelectionStart = temp;
+                mainWindow.NotepadTextBox.SelectionLength = FindTextBox.Text.Length;
+                mainWindow.NotepadTextBox.Focus();
+                return;
+            }
         }
 
         private void WayUpRadioBoxChecked(object sender, RoutedEventArgs e)
